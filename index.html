@@ -60,6 +60,7 @@ button{
 
 .hidden{display:none}
 
+/* 後台表格顯示一行 */
 table{
   width:100%;
   border-collapse:collapse;
@@ -76,24 +77,25 @@ th, td{
   white-space: nowrap;
 }
 
+/* 後台按鈕置中並跟隨內容 */
 #adminBtn{
-  position:fixed;
-  bottom:20px;
-  right:10px;
-  background:transparent;
-  border:none;
-  color:#555;
-  font-size:0.75rem;
-  cursor:pointer;
+  position: static;
+  margin: 1rem auto 0 auto;
+  display: block;
+  background: transparent;
+  border: none;
+  color: #555;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
 
+/* 版權訊息置中並跟隨內容 */
 #creator{
-  position:fixed;
-  bottom:6px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:0.65rem;
-  color:#888;
+  position: static;
+  margin: 0.5rem auto;
+  text-align: center;
+  font-size: 0.65rem;
+  color: #888;
 }
 </style>
 
@@ -153,8 +155,7 @@ firebase.initializeApp({
   appId: "1:1053091124424:web:231ee6e31d8694a81fc1fd"
 });
 const db = firebase.firestore();
-
-const PASSWORD_HASH = "a539315af4ebfe299c9409d009556ebff085a2de988c284fcf7fcb7feeae0435";
+const PASSWORD_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
 async function sha256(t){
   const e = new TextEncoder().encode(t);
@@ -194,18 +195,15 @@ function submitOrder(){
 
   let errors = [];
 
-  // 姓名 & 聯絡方式必填
   if(!nameVal) errors.push("請填寫姓名");
   if(!contactVal) errors.push("請填寫聯絡方式");
   if(!schoolVal) errors.push("請選擇是否在校生");
 
-  // 在校生必須填學號與班級
   if(schoolVal === "是"){
-    if(!/^\d{6}$/.test(sidVal)) errors.push("在校生學號必須填寫6位數字(ex.100001)");
-    if(!/^\d{3}$/.test(clsVal)) errors.push("在校生班級必須填寫3位數字(ex.121)");
+    if(!/^\d{6}$/.test(sidVal)) errors.push("在校生學號需為 6 碼數字");
+    if(!/^\d{3}$/.test(clsVal)) errors.push("在校生班級需為 3 碼數字");
   }
 
-  // 商品檢查
   const w = parseInt(wInput.value) || 0;
   const m = parseInt(mInput.value) || 0;
   if(w + m === 0) errors.push("請選擇商品");
@@ -237,8 +235,13 @@ async function loginAdmin(){
   const pw = prompt("輸入後台密碼");
   if(!pw) return;
   if(await sha256(pw) !== PASSWORD_HASH) return alert("密碼錯誤");
+
   formPage.classList.add("hidden");
   adminPage.classList.remove("hidden");
+
+  // 登入後隱藏後台按鈕
+  document.getElementById("adminBtn").style.display = "none";
+
   loadOrders();
 }
 
@@ -246,6 +249,8 @@ async function loginAdmin(){
 function logout(){
   adminPage.classList.add("hidden");
   formPage.classList.remove("hidden");
+  // 登出後顯示後台按鈕
+  document.getElementById("adminBtn").style.display = "block";
 }
 
 // 載入訂單
