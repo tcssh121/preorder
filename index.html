@@ -5,15 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>園遊會預購系統</title>
   <style>
-    body { font-family: system-ui, sans-serif; background: #f4f6fb; padding: 16px; }
-    .card { max-width: 480px; margin: 80px auto 20px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f4f6fb;
+      padding: 1rem;
+      margin: 0;
+    }
+
+    /* 表單卡片 */
+    .card {
+      max-width: 480px;
+      width: 90%; /* 手機縮小自動縮放 */
+      margin: 5rem auto 2rem auto; /* 上方留空間給齒輪 */
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 0.6rem 1.5rem rgba(0,0,0,0.08);
+    }
+
     h2 { text-align: center; }
-    label { display: block; margin-top: 12px; }
-    input { width: 100%; padding: 8px; margin-top: 4px; border-radius: 6px; border: 1px solid #ccc; }
-    button { margin-top: 16px; width: 100%; padding: 10px; border: none; border-radius: 8px; background: #4f46e5; color: white; font-size: 16px; cursor: pointer; }
+
+    label {
+      display: block;
+      margin-top: 0.8rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.7rem;
+      border: none;
+      border-radius: 8px;
+      background: #4f46e5;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
     .hidden { display: none; }
-    table { width: 100%; margin-top: 12px; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+
+    table {
+      width: 100%;
+      margin-top: 0.8rem;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.4rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    /* 中央透明齒輪 */
+    #adminGear {
+      position: fixed;
+      top: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem;
+      background: transparent; /* 透明背景 */
+      color: #333; /* 符號顏色 */
+      border: none;
+      cursor: pointer;
+      z-index: 1000;
+    }
   </style>
 
   <!-- Firebase SDK -->
@@ -22,11 +87,8 @@
 </head>
 <body>
 
-<!-- 小齒輪後台登入按鈕 -->
-<button onclick="loginAdmin()" 
-        style="position:fixed; top:10px; right:10px; font-size:18px; background:transparent; color:#555; border:none; cursor:pointer; z-index:1000;">
-  ⚙️
-</button>
+<!-- 中央透明齒輪後台登入按鈕 -->
+<button id="adminGear" onclick="loginAdmin()">⚙️</button>
 
 <div class="card" id="formPage">
   <h2>園遊會預購</h2>
@@ -57,12 +119,12 @@
 <script>
   // 🔹 Firebase Config (換成你自己的)
   const firebaseConfig = {
-    apiKey: "AIzaSyAkmQpNqBYiATO0LuYGRTJSHr5txshndGE",
-    authDomain: "preorder-system-5d0e8.firebaseapp.com",
-    projectId: "preorder-system-5d0e8",
-    storageBucket: "preorder-system-5d0e8.firebasestorage.app",
-    messagingSenderId: "1053091124424",
-    appId: "1:1053091124424:web:231ee6e31d8694a81fc1fd"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
 
   firebase.initializeApp(firebaseConfig);
