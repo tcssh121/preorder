@@ -1,241 +1,279 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>園遊會預購系統</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f4f6fb;
-      padding: 0.5rem;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>園遊會預購系統</title>
 
-    .card {
-      max-width: 480px;
-      width: 90%;
-      margin: 5rem 0 2rem 0;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 0.6rem 1.5rem rgba(0,0,0,0.08);
-    }
-
-    h2 { text-align: center; }
-    label { display: block; margin-top: 0.8rem; }
-    input, select {
-  width: 100%;           /* 寬度統一 */
-  padding: 0.5rem;
-  margin-top: 0.3rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  box-sizing: border-box; /* 包含 padding & border */
-  appearance: none;      /* 移除瀏覽器預設下拉箭頭樣式 */
+<style>
+body{
+  margin:0;
+  padding:0.5rem;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont;
+  background:#f4f6fb;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
 }
 
-    input::placeholder { color: #aaa; }
+.card{
+  width:90%;
+  max-width:480px;
+  background:white;
+  padding:1.5rem;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  margin-top:2rem;
+}
 
-    /* 下拉選單 placeholder 灰色 */
-    select#school { color: #aaa; }
-    select#school:valid { color: #000; }
+h2{text-align:center}
 
-    button {
-      margin-top: 1rem;
-      width: 100%;
-      padding: 0.7rem;
-      border: none;
-      border-radius: 8px;
-      background: #4f46e5;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-    }
+label{display:block;margin-top:0.8rem}
 
-    .hidden { display: none; }
+input,select{
+  width:100%;
+  padding:0.55rem;
+  margin-top:0.3rem;
+  font-size:1rem;
+  border-radius:6px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
 
-    table {
-      width: 100%;
-      margin-top: 0.8rem;
-      border-collapse: collapse;
-    }
+input::placeholder{color:#aaa}
 
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.4rem;
-      text-align: center;
-      font-size: 0.9rem;
-    }
+select{color:#aaa}
+select:valid{color:#000}
 
-    #adminGear {
-      position: fixed;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1rem;
-      background: transparent;
-      color: #555;
-      border: none;
-      cursor: pointer;
-      z-index: 1000;
-      padding: 4px 6px;
-    }
+button{
+  margin-top:1rem;
+  width:100%;
+  padding:0.8rem;
+  border:none;
+  border-radius:8px;
+  background:#4f46e5;
+  color:white;
+  font-size:1rem;
+  cursor:pointer;
+}
 
-    #creator {
-      font-size: 0.7rem;
-      color: #888;
-      margin-bottom: 4px;
-      text-align: center;
-    }
-  </style>
+.hidden{display:none}
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+/* 後台表格顯示一行 */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:1rem;
+  font-size:0.85rem;
+  word-break:break-word;
+  display:block;
+  overflow-x:auto;
+}
+th, td{
+  border:1px solid #ccc;
+  padding:0.4rem;
+  text-align:center;
+  white-space: nowrap;
+}
+
+#adminBtn{
+  position:fixed;
+  bottom:20px;
+  right:10px;
+  background:transparent;
+  border:none;
+  color:#555;
+  font-size:0.75rem;
+  cursor:pointer;
+}
+
+#creator{
+  position:fixed;
+  bottom:6px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:0.65rem;
+  color:#888;
+}
+</style>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
+
 <body>
 
 <div class="card" id="formPage">
-  <h2>園遊會預購</h2>
+<h2>園遊會預購</h2>
 
-  <label>是否為臺中二中在校生
-    <select id="school" required>
-      <option value="" disabled selected>請選擇</option>
-      <option value="是">是</option>
-      <option value="否">否</option>
-    </select>
-  </label>
-  <label>學號<input id="sid"></label>
-  <label>班級<input id="cls"></label>
-  <label>姓名<input id="name"></label>
-  <label>聯絡方式<input id="contact" placeholder="可聯絡的電話號碼"></label>
+<label>是否台中二中在校生
+<select id="school" required>
+  <option value="" disabled selected>請選擇</option>
+  <option value="是">是</option>
+  <option value="否">否</option>
+</select>
+</label>
 
-  <label>鬆餅（30元）<input type="number" id="w" value="0" min="0"></label>
-  <label>泰奶（60元）<input type="number" id="m" value="0" min="0"></label>
+<label>學號<input id="sid" placeholder="若非在校生或老師請填 000000" pattern="\d{6}" maxlength="6"></label>
+<label>班級<input id="cls" placeholder="若非在校生或老師請填 000" pattern="\d{3}" maxlength="3"></label>
+<label>姓名<input id="nameInput"></label>
+<label>聯絡方式
+<input id="contact" placeholder="可聯絡用電話號碼">
+</label>
 
-  <p>總價：<span id="totalPrice">0 元</span></p>
-  <button onclick="submitOrder()">送出訂單</button>
+<label>鬆餅（30 元）<input type="number" id="w" value="0" min="0"></label>
+<label>泰式奶茶（60 元）<input type="number" id="m" value="0" min="0"></label>
+
+<p>總價：<span id="total">0</span> 元</p>
+<button onclick="submitOrder()">送出訂單</button>
 </div>
 
 <div class="card hidden" id="adminPage">
-  <h2>後台統計</h2>
-  <table>
-    <thead>
-      <tr><th>姓名</th><th>在校生</th><th>聯絡方式</th><th>內容</th><th>金額</th><th>操作</th></tr>
-    </thead>
-    <tbody id="orders"></tbody>
-  </table>
-  <button onclick="logoutAdmin()">登出後台</button>
+<h2>後台訂單</h2>
+<table>
+<thead>
+<tr><th>姓名</th><th>學號</th><th>班級</th><th>在校生</th><th>聯絡</th><th>內容</th><th>金額</th><th>刪除</th></tr>
+</thead>
+<tbody id="orders"></tbody>
+</table>
+<button onclick="logout()">登出後台</button>
 </div>
 
-<button id="adminGear" onclick="loginAdmin()">進入後台</button>
-<div id="creator"> Copyright© 2025 Kenny L. All rights reserved</div>
+<button id="adminBtn" onclick="loginAdmin()">後台登入</button>
+<div id="creator">Copyright© 2025 Kenny L. All rights reserved</div>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAkmQpNqBYiATO0LuYGRTJSHr5txshndGE",
-    authDomain: "preorder-system-5d0e8.firebaseapp.com",
-    projectId: "preorder-system-5d0e8",
-    storageBucket: "preorder-system-5d0e8.firebasestorage.app",
-    messagingSenderId: "1053091124424",
-    appId: "1:1053091124424:web:231ee6e31d8694a81fc1fd"
-  };
+firebase.initializeApp({
+  apiKey: "AIzaSyAkmQpNqBYiATO0LuYGRTJSHr5txshndGE",
+  authDomain: "preorder-system-5d0e8.firebaseapp.com",
+  projectId: "preorder-system-5d0e8",
+  storageBucket: "preorder-system-5d0e8.firebasestorage.app",
+  messagingSenderId: "1053091124424",
+  appId: "1:1053091124424:web:231ee6e31d8694a81fc1fd"
+});
+const db = firebase.firestore();
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const PASSWORD = '1234';
+const PASSWORD_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
-  function calcTotal() {
-    const w = +document.getElementById('w').value;
-    const m = +document.getElementById('m').value;
-    const combo = Math.min(w, m);
-    const total = combo*80 + (w-combo)*30 + (m-combo)*60;
-    let breakdown = '';
-    if (combo>0) breakdown += `套餐 x ${combo} = ${combo*80} 元, `;
-    if (w-combo>0) breakdown += `鬆餅 x ${w-combo} = ${(w-combo)*30} 元, `;
-    if (m-combo>0) breakdown += `泰奶 x ${m-combo} = ${(m-combo)*60} 元`;
-    document.getElementById('totalPrice').textContent = `${total} 元 (${breakdown})`;
+async function sha256(t){
+  const e = new TextEncoder().encode(t);
+  const b = await crypto.subtle.digest("SHA-256", e);
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+
+// DOM 元素
+const sid = document.getElementById("sid");
+const cls = document.getElementById("cls");
+const nameInput = document.getElementById("nameInput");
+const school = document.getElementById("school");
+const contact = document.getElementById("contact");
+const wInput = document.getElementById("w");
+const mInput = document.getElementById("m");
+const total = document.getElementById("total");
+const formPage = document.getElementById("formPage");
+const adminPage = document.getElementById("adminPage");
+const orders = document.getElementById("orders");
+
+// 計算總價
+function calc(){
+  const w = parseInt(wInput.value) || 0;
+  const m = parseInt(mInput.value) || 0;
+  const c = Math.min(w, m);
+  total.textContent = c*80 + (w-c)*30 + (m-c)*60;
+}
+wInput.oninput = mInput.oninput = calc;
+
+// 送出訂單
+function submitOrder(){
+  const sidVal = sid.value.trim() || "000000";
+  const clsVal = cls.value.trim() || "000";
+  const nameVal = nameInput.value.trim();
+  const schoolVal = school.value;
+  const contactVal = contact.value.trim();
+
+  if(!/^\d{6}$/.test(sidVal) && sidVal !== "000000"){
+    return alert("學號需為 6 碼數字或填 000000");
+  }
+  if(!/^\d{3}$/.test(clsVal) && clsVal !== "000"){
+    return alert("班級需為 3 碼數字或填 000");
   }
 
-  document.getElementById('w').addEventListener('input', calcTotal);
-  document.getElementById('m').addEventListener('input', calcTotal);
-  calcTotal();
+  let errors = [];
+  if(!schoolVal) errors.push("請選擇是否在校生");
+  if(!nameVal) errors.push("請填寫姓名");
+  if(!contactVal) errors.push("請填寫聯絡方式");
+  if(errors.length > 0){
+    return alert(errors.join("\n"));
+  }
 
-  function submitOrder() {
-    const sid = document.getElementById('sid').value;
-    const cls = document.getElementById('cls').value;
-    const name = document.getElementById('name').value;
-    const school = document.getElementById('school').value;
-    const contact = document.getElementById('contact').value;
-    const w = +document.getElementById('w').value;
-    const m = +document.getElementById('m').value;
-    if (!sid || !cls || !name || !school || !contact || (w===0 && m===0)) {
-      return alert('請填寫完整資料或選擇商品');
-    }
-    const combo = Math.min(w,m);
-    const total = combo*80 + (w-combo)*30 + (m-combo)*60;
+  const w = parseInt(wInput.value) || 0;
+  const m = parseInt(mInput.value) || 0;
+  if(w + m === 0) return alert("請選擇商品");
 
-    db.collection('orders').add({sid,cls,name,school,contact,w,m,total,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()})
-    .then(()=> {
-      alert(`訂單送出成功！總價 ${total} 元`);
-      document.getElementById('sid').value='';
-      document.getElementById('cls').value='';
-      document.getElementById('name').value='';
-      document.getElementById('school').value='';
-      document.getElementById('contact').value='';
-      document.getElementById('w').value=0;
-      document.getElementById('m').value=0;
-      calcTotal();
-    }).catch(err=>{
-      console.error(err);
-      alert('送單失敗，請再試一次');
+  const c = Math.min(w, m);
+  const price = c*80 + (w-c)*30 + (m-c)*60;
+
+  db.collection("orders").add({
+    sid: sidVal,
+    cls: clsVal,
+    name: nameVal,
+    school: schoolVal,
+    contact: contactVal,
+    w, m, price,
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("送出成功，總價 "+price+" 元");
+    document.querySelectorAll("input").forEach(i=>i.value="");
+    school.value="";
+    wInput.value = mInput.value = 0;
+    calc();
+  });
+}
+
+// 後台登入
+async function loginAdmin(){
+  const pw = prompt("輸入後台密碼");
+  if(!pw) return;
+  if(await sha256(pw) !== PASSWORD_HASH) return alert("密碼錯誤");
+  formPage.classList.add("hidden");
+  adminPage.classList.remove("hidden");
+  loadOrders();
+}
+
+// 登出
+function logout(){
+  adminPage.classList.add("hidden");
+  formPage.classList.remove("hidden");
+}
+
+// 載入訂單
+function loadOrders(){
+  db.collection("orders").get().then(s=>{
+    orders.innerHTML = "";
+    s.forEach(d=>{
+      const o = d.data();
+      orders.innerHTML += `
+      <tr>
+        <td>${o.name}</td>
+        <td>${o.sid}</td>
+        <td>${o.cls}</td>
+        <td>${o.school}</td>
+        <td>${o.contact}</td>
+        <td>鬆餅${o.w} 泰奶${o.m}</td>
+        <td>${o.price}</td>
+        <td><button onclick="del('${d.id}')">✕</button></td>
+      </tr>`;
     });
-  }
+  });
+}
 
-  function loginAdmin() {
-    const pw = prompt('輸入後台密碼');
-    if (pw !== PASSWORD) return alert('密碼錯誤');
-    document.getElementById('formPage').classList.add('hidden');
-    document.getElementById('adminPage').classList.remove('hidden');
-    loadOrders();
-  }
-
-  function logoutAdmin() {
-    document.getElementById('formPage').classList.remove('hidden');
-    document.getElementById('adminPage').classList.add('hidden');
-  }
-
-  function loadOrders() {
-    db.collection('orders').orderBy('timestamp').get()
-      .then(snapshot=>{
-        const tbody=document.getElementById('orders');
-        tbody.innerHTML='';
-        snapshot.forEach(doc=>{
-          const o = doc.data();
-          tbody.innerHTML+=`<tr>
-            <td>${o.name}</td>
-            <td>${o.school}</td>
-            <td>${o.contact}</td>
-            <td>鬆餅${o.w} 泰奶${o.m}</td>
-            <td>${o.total}</td>
-            <td><button onclick="deleteOrder('${doc.id}')">刪除</button></td>
-          </tr>`;
-        });
-      });
-  }
-
-  function deleteOrder(id) {
-    if(!confirm('確定要刪除這筆訂單嗎？')) return;
-    db.collection('orders').doc(id).delete()
-      .then(()=>{ alert('刪除成功'); loadOrders(); })
-      .catch(err=>{ console.error(err); alert('刪除失敗'); });
-  }
+// 刪除訂單
+function del(id){
+  if(confirm("確定刪除？"))
+    db.collection("orders").doc(id).delete().then(loadOrders);
+}
 </script>
 
 </body>
