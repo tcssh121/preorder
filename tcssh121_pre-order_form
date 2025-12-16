@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>園遊會預購系統</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6fb;
+      padding: 16px;
+    }
+    .card {
+      max-width: 420px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    h2 { text-align: center; }
+    label { display: block; margin-top: 12px; }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 16px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #4f46e5;
+      color: white;
+      font-size: 16px;
+    }
+    .hidden { display: none; }
+    table { width: 100%; margin-top: 12px; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="formPage">
+  <h2>園遊會預購</h2>
+
+  <label>學號<input id="sid"></label>
+  <label>班級<input id="cls"></label>
+  <label>姓名<input id="name"></label>
+
+  <label>鬆餅（30）<input type="number" id="w" value="0" min="0"></label>
+  <label>泰奶（60）<input type="number" id="m" value="0" min="0"></label>
+
+  <button onclick="submitOrder()">送出訂單</button>
+</div>
+
+<div class="card hidden" id="adminPage">
+  <h2>後台統計</h2>
+  <table>
+    <thead>
+      <tr><th>姓名</th><th>內容</th><th>金額</th></tr>
+    </thead>
+    <tbody id="orders"></tbody>
+  </table>
+</div>
+
+<script>
+  const PASSWORD = '1234'; // ← 你可以改這裡
+  let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+
+  function submitOrder() {
+    const w = +document.getElementById('w').value;
+    const m = +document.getElementById('m').value;
+    const combo = Math.min(w, m);
+    const total = combo * 80 + (w - combo) * 30 + (m - combo) * 60;
+
+    orders.push({
+      name: document.getElementById('name').value,
+      detail: `鬆餅${w} 泰奶${m}`,
+      total
+    });
+
+    localStorage.setItem('orders', JSON.stringify(orders));
+    alert('已送出，總價 ' + total + ' 元');
+  }
+
+  function showAdmin() {
+    const pw = prompt('輸入後台密碼');
+    if (pw !== PASSWORD) return alert('密碼錯誤');
+
+    document.getElementById('formPage').classList.add('hidden');
+    document.getElementById('adminPage').classList.remove('hidden');
+
+    const tbody = document.getElementById('orders');
+    tbody.innerHTML = '';
+    orders.forEach(o => {
+      tbody.innerHTML += `<tr><td>${o.name}</td><td>${o.detail}</td><td>${o.total}</td></tr>`;
+    });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F12') showAdmin();
+  });
+</script>
+
+</body>
+</html>
