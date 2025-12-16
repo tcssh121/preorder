@@ -8,15 +8,19 @@
     body {
       font-family: system-ui, sans-serif;
       background: #f4f6fb;
-      padding: 1rem;
+      padding: 0.5rem;
       margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* 水平置中 */
+      min-height: 100vh;
     }
 
     /* 表單卡片 */
     .card {
       max-width: 480px;
       width: 90%; /* 手機縮小自動縮放 */
-      margin: 5rem auto 2rem auto; /* 上方留空間給齒輪 */
+      margin: 5rem 0 2rem 0; /* 上方留空間 */
       background: white;
       padding: 1.5rem;
       border-radius: 12px;
@@ -66,18 +70,27 @@
       font-size: 0.9rem;
     }
 
-    /* 中央透明齒輪 */
+    /* 下方置中後台按鈕 */
     #adminGear {
       position: fixed;
-      top: 0.5rem;
+      bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 1.5rem;
+      font-size: 1rem;
       background: transparent; /* 透明背景 */
-      color: #333; /* 符號顏色 */
+      color: #555;
       border: none;
       cursor: pointer;
       z-index: 1000;
+      padding: 4px 6px;
+    }
+
+    /* 最下方創作者文字 */
+    #creator {
+      font-size: 0.7rem;
+      color: #888;
+      margin-bottom: 4px;
+      text-align: center;
     }
   </style>
 
@@ -87,9 +100,7 @@
 </head>
 <body>
 
-<!-- 中央透明齒輪後台登入按鈕 -->
-<button id="adminGear" onclick="loginAdmin()">⚙️</button>
-
+<!-- 表單頁面 -->
 <div class="card" id="formPage">
   <h2>園遊會預購</h2>
 
@@ -105,6 +116,7 @@
   <button onclick="submitOrder()">送出訂單</button>
 </div>
 
+<!-- 後台頁面 -->
 <div class="card hidden" id="adminPage">
   <h2>後台統計</h2>
   <table>
@@ -116,15 +128,21 @@
   <button onclick="logoutAdmin()">登出後台</button>
 </div>
 
+<!-- 下方置中後台按鈕 -->
+<button id="adminGear" onclick="loginAdmin()">進入後台</button>
+
+<!-- 最下方創作者文字 -->
+<div id="creator"> Copyright© 2025 Kenny L. All rights reserved</div>
+
 <script>
   // 🔹 Firebase Config (換成你自己的)
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+   apiKey: "AIzaSyAkmQpNqBYiATO0LuYGRTJSHr5txshndGE",
+    authDomain: "preorder-system-5d0e8.firebaseapp.com",
+    projectId: "preorder-system-5d0e8",
+    storageBucket: "preorder-system-5d0e8.firebasestorage.app",
+    messagingSenderId: "1053091124424",
+    appId: "1:1053091124424:web:231ee6e31d8694a81fc1fd"
   };
 
   firebase.initializeApp(firebaseConfig);
