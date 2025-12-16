@@ -12,15 +12,14 @@
       margin: 0;
       display: flex;
       flex-direction: column;
-      align-items: center; /* 水平置中 */
+      align-items: center;
       min-height: 100vh;
     }
 
-    /* 表單卡片 */
     .card {
       max-width: 480px;
-      width: 90%; /* 手機縮小自動縮放 */
-      margin: 5rem 0 2rem 0; /* 上方留空間 */
+      width: 90%;
+      margin: 5rem 0 2rem 0;
       background: white;
       padding: 1.5rem;
       border-radius: 12px;
@@ -28,20 +27,23 @@
     }
 
     h2 { text-align: center; }
+    label { display: block; margin-top: 0.8rem; }
+    input, select {
+  width: 100%;           /* 寬度統一 */
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  box-sizing: border-box; /* 包含 padding & border */
+  appearance: none;      /* 移除瀏覽器預設下拉箭頭樣式 */
+}
 
-    label {
-      display: block;
-      margin-top: 0.8rem;
-    }
+    input::placeholder { color: #aaa; }
 
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.3rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
+    /* 下拉選單 placeholder 灰色 */
+    select#school { color: #aaa; }
+    select#school:valid { color: #000; }
 
     button {
       margin-top: 1rem;
@@ -70,14 +72,13 @@
       font-size: 0.9rem;
     }
 
-    /* 下方置中後台按鈕 */
     #adminGear {
       position: fixed;
       bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 1rem;
-      background: transparent; /* 透明背景 */
+      background: transparent;
       color: #555;
       border: none;
       cursor: pointer;
@@ -85,7 +86,6 @@
       padding: 4px 6px;
     }
 
-    /* 最下方創作者文字 */
     #creator {
       font-size: 0.7rem;
       color: #888;
@@ -100,44 +100,45 @@
 </head>
 <body>
 
-<!-- 表單頁面 -->
 <div class="card" id="formPage">
   <h2>園遊會預購</h2>
 
+  <label>是否為臺中二中在校生
+    <select id="school" required>
+      <option value="" disabled selected>請選擇</option>
+      <option value="是">是</option>
+      <option value="否">否</option>
+    </select>
+  </label>
   <label>學號<input id="sid"></label>
   <label>班級<input id="cls"></label>
   <label>姓名<input id="name"></label>
+  <label>聯絡方式<input id="contact" placeholder="可聯絡的電話號碼"></label>
 
   <label>鬆餅（30元）<input type="number" id="w" value="0" min="0"></label>
   <label>泰奶（60元）<input type="number" id="m" value="0" min="0"></label>
 
   <p>總價：<span id="totalPrice">0 元</span></p>
-
   <button onclick="submitOrder()">送出訂單</button>
 </div>
 
-<!-- 後台頁面 -->
 <div class="card hidden" id="adminPage">
   <h2>後台統計</h2>
   <table>
     <thead>
-      <tr><th>姓名</th><th>內容</th><th>金額</th><th>操作</th></tr>
+      <tr><th>姓名</th><th>在校生</th><th>聯絡方式</th><th>內容</th><th>金額</th><th>操作</th></tr>
     </thead>
     <tbody id="orders"></tbody>
   </table>
   <button onclick="logoutAdmin()">登出後台</button>
 </div>
 
-<!-- 下方置中後台按鈕 -->
 <button id="adminGear" onclick="loginAdmin()">進入後台</button>
-
-<!-- 最下方創作者文字 -->
 <div id="creator"> Copyright© 2025 Kenny L. All rights reserved</div>
 
 <script>
-  // 🔹 Firebase Config (換成你自己的)
   const firebaseConfig = {
-   apiKey: "AIzaSyAkmQpNqBYiATO0LuYGRTJSHr5txshndGE",
+    apiKey: "AIzaSyAkmQpNqBYiATO0LuYGRTJSHr5txshndGE",
     authDomain: "preorder-system-5d0e8.firebaseapp.com",
     projectId: "preorder-system-5d0e8",
     storageBucket: "preorder-system-5d0e8.firebasestorage.app",
@@ -147,21 +148,17 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const PASSWORD = '1234';
 
-  const PASSWORD = '1234'; // 後台密碼，可改
-
-  // 計算總價即時顯示
   function calcTotal() {
     const w = +document.getElementById('w').value;
     const m = +document.getElementById('m').value;
-    const combo = Math.min(w, m); // 套餐數量
-    const total = combo * 80 + (w - combo) * 30 + (m - combo) * 60;
-
+    const combo = Math.min(w, m);
+    const total = combo*80 + (w-combo)*30 + (m-combo)*60;
     let breakdown = '';
-    if (combo > 0) breakdown += `套餐 x ${combo} = ${combo*80} 元, `;
-    if (w - combo > 0) breakdown += `鬆餅 x ${w - combo} = ${(w-combo)*30} 元, `;
-    if (m - combo > 0) breakdown += `泰奶 x ${m - combo} = ${(m-combo)*60} 元`;
-
+    if (combo>0) breakdown += `套餐 x ${combo} = ${combo*80} 元, `;
+    if (w-combo>0) breakdown += `鬆餅 x ${w-combo} = ${(w-combo)*30} 元, `;
+    if (m-combo>0) breakdown += `泰奶 x ${m-combo} = ${(m-combo)*60} 元`;
     document.getElementById('totalPrice').textContent = `${total} 元 (${breakdown})`;
   }
 
@@ -169,40 +166,38 @@
   document.getElementById('m').addEventListener('input', calcTotal);
   calcTotal();
 
-  // 送單
   function submitOrder() {
     const sid = document.getElementById('sid').value;
     const cls = document.getElementById('cls').value;
     const name = document.getElementById('name').value;
+    const school = document.getElementById('school').value;
+    const contact = document.getElementById('contact').value;
     const w = +document.getElementById('w').value;
     const m = +document.getElementById('m').value;
-
-    if (!sid || !cls || !name || (w===0 && m===0)) {
+    if (!sid || !cls || !name || !school || !contact || (w===0 && m===0)) {
       return alert('請填寫完整資料或選擇商品');
     }
+    const combo = Math.min(w,m);
+    const total = combo*80 + (w-combo)*30 + (m-combo)*60;
 
-    const combo = Math.min(w, m);
-    const total = combo * 80 + (w - combo) * 30 + (m - combo) * 60;
-
-    db.collection('orders').add({
-      sid, cls, name,
-      w, m, total,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
+    db.collection('orders').add({sid,cls,name,school,contact,w,m,total,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()})
+    .then(()=> {
       alert(`訂單送出成功！總價 ${total} 元`);
-      document.getElementById('sid').value = '';
-      document.getElementById('cls').value = '';
-      document.getElementById('name').value = '';
-      document.getElementById('w').value = 0;
-      document.getElementById('m').value = 0;
+      document.getElementById('sid').value='';
+      document.getElementById('cls').value='';
+      document.getElementById('name').value='';
+      document.getElementById('school').value='';
+      document.getElementById('contact').value='';
+      document.getElementById('w').value=0;
+      document.getElementById('m').value=0;
       calcTotal();
-    }).catch(err => {
+    }).catch(err=>{
       console.error(err);
       alert('送單失敗，請再試一次');
     });
   }
 
-  // 後台登入
   function loginAdmin() {
     const pw = prompt('輸入後台密碼');
     if (pw !== PASSWORD) return alert('密碼錯誤');
@@ -216,17 +211,17 @@
     document.getElementById('adminPage').classList.add('hidden');
   }
 
-  // 後台載入訂單
   function loadOrders() {
-    db.collection('orders').orderBy('timestamp')
-      .get()
-      .then(snapshot => {
-        const tbody = document.getElementById('orders');
-        tbody.innerHTML = '';
-        snapshot.forEach(doc => {
+    db.collection('orders').orderBy('timestamp').get()
+      .then(snapshot=>{
+        const tbody=document.getElementById('orders');
+        tbody.innerHTML='';
+        snapshot.forEach(doc=>{
           const o = doc.data();
-          tbody.innerHTML += `<tr>
+          tbody.innerHTML+=`<tr>
             <td>${o.name}</td>
+            <td>${o.school}</td>
+            <td>${o.contact}</td>
             <td>鬆餅${o.w} 泰奶${o.m}</td>
             <td>${o.total}</td>
             <td><button onclick="deleteOrder('${doc.id}')">刪除</button></td>
@@ -235,18 +230,11 @@
       });
   }
 
-  // 刪除訂單
   function deleteOrder(id) {
     if(!confirm('確定要刪除這筆訂單嗎？')) return;
     db.collection('orders').doc(id).delete()
-      .then(() => {
-        alert('刪除成功');
-        loadOrders(); // 刷新列表
-      })
-      .catch(err => {
-        console.error(err);
-        alert('刪除失敗');
-      });
+      .then(()=>{ alert('刪除成功'); loadOrders(); })
+      .catch(err=>{ console.error(err); alert('刪除失敗'); });
   }
 </script>
 
