@@ -105,7 +105,7 @@ th, td{
 </head>
 
 <body>
-
+<img src="images/logo.jpg" alt="宣傳單" class="page-image">
 <div class="card" id="formPage">
 <h2>園遊會預購</h2>
 
@@ -162,6 +162,7 @@ async function sha256(t){
   const b = await crypto.subtle.digest("SHA-256", e);
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
+
 
 // DOM 元素
 const sid = document.getElementById("sid");
