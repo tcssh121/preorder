@@ -171,6 +171,15 @@ th, td{
 
 <div class="card hidden" id="adminPage">
 <h2>後台訂單</h2>
+<div id="stats"
+style="margin-top: 0.8rem;font-size: 0.85rem;">
+  <p>鬆餅已售:<span id="statW">0</span></p>
+  <p>泰奶已售:<span id="statM">0</span></p>
+  <p>總營收:<span id="statRevenue">0</span></p>元
+</p>
+  <p>總成本:<span id="statCost">0</span>元</p>
+  <p><strong>淨利:<span id="statProfit">0</span>元</strong></p>
+</div>
 <table>
 <thead>
 <tr><th>姓名</th><th>學號</th><th>班級</th><th>在校生</th><th>聯絡</th><th>內容</th><th>金額</th><th>刪除</th></tr>
@@ -223,7 +232,27 @@ function calc(){
   total.textContent = c*80 + (w-c)*30 + (m-c)*60;
 }
 wInput.oninput = mInput.oninput = calc;
+function updateStats(snapshot){
+  let wTotal = 0;
+  let mTotal = 0;
+  let revenue = 0;
 
+  snapshot.forEach(d=>{
+    const o = d.data();
+    wTotal += o.w || 0;
+    mTotal += o.m || 0;
+    revenue += o.price || 0;
+  });
+
+  const cost = wTotal * 5 + mTotal * 25;
+  const profit = revenue - cost;
+
+  statW.textContent = wTotal;
+  statM.textContent = mTotal;
+  statRevenue.textContent = revenue;
+  statCost.textContent = cost;
+  statProfit. textContent = profit;
+}
 // 送出訂單
 function submitOrder(){
   const sidVal = sid.value.trim();
@@ -310,6 +339,7 @@ function loadOrders(){
         <td><button onclick="del('${d.id}')">✕</button></td>
       </tr>`;
     });
+  updateStats(s);
   });
 }
 
