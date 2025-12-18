@@ -6,21 +6,23 @@
 <title>園遊會預購系統</title>
 
 <style>
+.logo{
+  max-width: 40%;
+  width: 100px;
+  height: auto;
+  margin: 0 auto 0.5rem;
+  display: block;
+}
+
+.publicity{
+  max-width: 70%;
+  width: 400px;
+  height: auto;
+  margin: 0 auto 0.5rem;
+  display: block;
+}
+
 body{
-  .logo{
-    max-width: 40%;
-    width: 100px;
-    height: auto;
-    margin: 0 auto 0.5rem;
-    display: block;
-  }
-  .publicity{
-    max-width: 70%;
-    width: 400px;
-    height: auto;
-    margin: 0 auto 0.5rem;
-    display: block;
-  }
   margin:0;
   padding:0.5rem;
   font-family:system-ui,-apple-system,BlinkMacSystemFont;
@@ -139,12 +141,13 @@ th, td{
 
 <body>
 <img src="images/logo.jpg" alt="校徽" class="logo">
-<img src="images/publicity.jpg" alt="宣傳單" class="publicity"
+<img src="images/publicity.jpg" alt="宣傳單" class="publicity">
+
+<!-- 前台表單 -->
 <div class="card" id="formPage">
 <h2>園遊會預購</h2>
 
 <div class="form-box">
-
 <label>是否台中二中在校生
 <select id="school" required>
   <option value="" disabled selected>請選擇</option>
@@ -163,26 +166,36 @@ th, td{
 <label>鬆餅（30 元）<input type="number" id="w" value="0" min="0"></label>
 <label>泰式奶茶（60 元）<input type="number" id="m" value="0" min="0"></label>
 
-<div>
-
 <p>總價：<span id="total">0</span> 元</p>
 <button onclick="submitOrder()">送出訂單</button>
 </div>
+</div>
 
+<!-- 後台 -->
 <div class="card hidden" id="adminPage">
 <h2>後台訂單</h2>
-<div id="stats"
-style="margin-top: 0.8rem;font-size: 0.85rem;">
+<div id="stats" style="margin-top:0.8rem;font-size:0.85rem;">
   <p>鬆餅已售:<span id="statW">0</span></p>
   <p>泰奶已售:<span id="statM">0</span></p>
   <p>總營收:<span id="statRevenue">0</span>元</p>
-</p>
-  <p>總成本:<span id="statCost">0</span>元</p>
+  <p>總成本:<span id="statCost">0</span></p>
   <p><strong>淨利:<span id="statProfit">0</span>元</strong></p>
 </div>
+
 <table>
 <thead>
-<tr><th>姓名</th><th>學號</th><th>班級</th><th>在校生</th><th>聯絡</th><th>內容</th><th>金額</th><th>刪除</th></tr>
+<tr>
+  <th>姓名</th>
+  <th>學號</th>
+  <th>班級</th>
+  <th>在校生</th>
+  <th>聯絡</th>
+  <th>後台備註</th>
+  <th>內容</th>
+  <th>金額</th>
+  <th>填寫時間</th>
+  <th>刪除</th>
+</tr>
 </thead>
 <tbody id="orders"></tbody>
 </table>
@@ -210,7 +223,6 @@ async function sha256(t){
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
-
 // DOM 元素
 const sid = document.getElementById("sid");
 const cls = document.getElementById("cls");
@@ -223,6 +235,11 @@ const total = document.getElementById("total");
 const formPage = document.getElementById("formPage");
 const adminPage = document.getElementById("adminPage");
 const orders = document.getElementById("orders");
+const statW = document.getElementById("statW");
+const statM = document.getElementById("statM");
+const statRevenue = document.getElementById("statRevenue");
+const statCost = document.getElementById("statCost");
+const statProfit = document.getElementById("statProfit");
 
 // 計算總價
 function calc(){
@@ -232,18 +249,16 @@ function calc(){
   total.textContent = c*80 + (w-c)*30 + (m-c)*60;
 }
 wInput.oninput = mInput.oninput = calc;
-function updateStats(snapshot){
-  let wTotal = 0;
-  let mTotal = 0;
-  let revenue = 0;
 
+// 更新後台統計
+function updateStats(snapshot){
+  let wTotal = 0, mTotal = 0, revenue = 0;
   snapshot.forEach(d=>{
     const o = d.data();
     wTotal += o.w || 0;
     mTotal += o.m || 0;
     revenue += o.price || 0;
   });
-
   const cost = wTotal * 5 + mTotal * 25;
   const profit = revenue - cost;
 
@@ -251,8 +266,9 @@ function updateStats(snapshot){
   statM.textContent = mTotal;
   statRevenue.textContent = revenue;
   statCost.textContent = cost;
-  statProfit. textContent = profit;
+  statProfit.textContent = profit;
 }
+
 // 送出訂單
 function submitOrder(){
   const sidVal = sid.value.trim();
@@ -260,9 +276,7 @@ function submitOrder(){
   const nameVal = nameInput.value.trim();
   const schoolVal = school.value;
   const contactVal = contact.value.trim();
-
   let errors = [];
-
   if(!nameVal) errors.push("請填寫姓名");
   if(!contactVal) errors.push("請填寫聯絡方式");
   if(!schoolVal) errors.push("請選擇是否在校生");
@@ -274,11 +288,10 @@ function submitOrder(){
 
   const w = parseInt(wInput.value) || 0;
   const m = parseInt(mInput.value) || 0;
-  if(w + m === 0) errors.push("請選擇商品");
+  if(w+m === 0) errors.push("請選擇商品");
+  if(errors.length>0) return alert(errors.join("\n"));
 
-  if(errors.length > 0) return alert(errors.join("\n"));
-
-  const c = Math.min(w, m);
+  const c = Math.min(w,m);
   const price = c*80 + (w-c)*30 + (m-c)*60;
 
   db.collection("orders").add({
@@ -306,8 +319,6 @@ async function loginAdmin(){
 
   formPage.classList.add("hidden");
   adminPage.classList.remove("hidden");
-
-  // 登入後隱藏後台按鈕
   document.getElementById("adminBtn").style.display = "none";
 
   loadOrders();
@@ -317,38 +328,48 @@ async function loginAdmin(){
 function logout(){
   adminPage.classList.add("hidden");
   formPage.classList.remove("hidden");
-  // 登出後顯示後台按鈕
   document.getElementById("adminBtn").style.display = "block";
 }
 
-// 載入訂單
+// 載入訂單並依填寫時間排序
 function loadOrders(){
-  db.collection("orders").get().then(s=>{
-    orders.innerHTML = "";
-    s.forEach(d=>{
-      const o = d.data();
-      orders.innerHTML += `
-      <tr>
-        <td>${o.name}</td>
-        <td>${o.sid}</td>
-        <td>${o.cls}</td>
-        <td>${o.school}</td>
-        <td>${o.contact}</td>
-        <td>鬆餅${o.w} 泰奶${o.m}</td>
-        <td>${o.price}</td>
-        <td><button onclick="del('${d.id}')">✕</button></td>
-      </tr>`;
+  db.collection("orders")
+    .orderBy("time", "desc")
+    .onSnapshot(snapshot=>{
+      orders.innerHTML = "";
+      snapshot.forEach(d=>{
+        const o = d.data();
+        orders.innerHTML += `
+          <tr>
+            <td>${o.name}</td>
+            <td>${o.sid}</td>
+            <td>${o.cls}</td>
+            <td>${o.school}</td>
+            <td>${o.contact}</td>
+            <td><input value="${o.adminNote || ""}" placeholder="後台備註" style="width:120px;font-size:0.75rem" onblur="saveAdminNote('${d.id}', this.value)"></td>
+            <td>鬆餅${o.w || 0} 泰奶${o.m || 0}</td>
+            <td>${o.price || 0}</td>
+            <td>${formatTime(o.time)}</td>
+            <td><button onclick="del('${d.id}')">✕</button></td>
+          </tr>`;
+      });
+      updateStats(snapshot);
     });
-  updateStats(s);
-  });
 }
 
-// 刪除訂單
+function saveAdminNote(id, text){
+  db.collection("orders").doc(id).update({ adminNote: text.trim() });
+}
+
 function del(id){
   if(confirm("確定刪除？"))
     db.collection("orders").doc(id).delete().then(loadOrders);
 }
-</script>
 
+function formatTime(t){
+  if(!t) return "—";
+  return t.toDate().toLocaleString("zh-TW",{ hour12:false });
+}
+</script>
 </body>
 </html>
